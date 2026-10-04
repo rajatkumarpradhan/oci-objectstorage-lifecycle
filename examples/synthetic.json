@@ -1,0 +1,260 @@
+{
+ "as_of": "2026-10-01",
+ "prices": {
+  "standard": 0.025,
+  "infrequent_access": 0.012,
+  "archive": 0.003
+ },
+ "buckets": [
+  {
+   "name": "app-logs",
+   "versioning": false,
+   "lifecycle_rules": [],
+   "objects": [
+    {
+     "key": "2026/01/0.dat",
+     "size_bytes": 21474836480,
+     "tier": "standard",
+     "last_modified": "2026-01-15"
+    },
+    {
+     "key": "2026/01/1.dat",
+     "size_bytes": 21474836480,
+     "tier": "standard",
+     "last_modified": "2026-01-15"
+    },
+    {
+     "key": "2026/01/2.dat",
+     "size_bytes": 21474836480,
+     "tier": "standard",
+     "last_modified": "2026-01-15"
+    },
+    {
+     "key": "2026/01/3.dat",
+     "size_bytes": 21474836480,
+     "tier": "standard",
+     "last_modified": "2026-01-15"
+    },
+    {
+     "key": "2026/01/4.dat",
+     "size_bytes": 21474836480,
+     "tier": "standard",
+     "last_modified": "2026-01-15"
+    },
+    {
+     "key": "2026/01/5.dat",
+     "size_bytes": 21474836480,
+     "tier": "standard",
+     "last_modified": "2026-01-15"
+    },
+    {
+     "key": "2023/0.dat",
+     "size_bytes": 53687091200,
+     "tier": "standard",
+     "last_modified": "2023-11-02"
+    },
+    {
+     "key": "2023/1.dat",
+     "size_bytes": 53687091200,
+     "tier": "standard",
+     "last_modified": "2023-11-02"
+    },
+    {
+     "key": "2023/2.dat",
+     "size_bytes": 53687091200,
+     "tier": "standard",
+     "last_modified": "2023-11-02"
+    },
+    {
+     "key": "2023/3.dat",
+     "size_bytes": 53687091200,
+     "tier": "standard",
+     "last_modified": "2023-11-02"
+    },
+    {
+     "key": "2026/09/0.dat",
+     "size_bytes": 10737418240,
+     "tier": "standard",
+     "last_modified": "2026-09-25"
+    },
+    {
+     "key": "2026/09/1.dat",
+     "size_bytes": 10737418240,
+     "tier": "standard",
+     "last_modified": "2026-09-25"
+    },
+    {
+     "key": "2026/09/2.dat",
+     "size_bytes": 10737418240,
+     "tier": "standard",
+     "last_modified": "2026-09-25"
+    },
+    {
+     "key": "2026/09/3.dat",
+     "size_bytes": 10737418240,
+     "tier": "standard",
+     "last_modified": "2026-09-25"
+    },
+    {
+     "key": "2026/09/4.dat",
+     "size_bytes": 10737418240,
+     "tier": "standard",
+     "last_modified": "2026-09-25"
+    }
+   ],
+   "multipart_uploads": [
+    {
+     "key": "big.tar",
+     "initiated": "2026-08-01",
+     "size_bytes": 5368709120
+    },
+    {
+     "key": "new.tar",
+     "initiated": "2026-09-30",
+     "size_bytes": 1073741824
+    }
+   ]
+  },
+  {
+   "name": "user-uploads",
+   "versioning": true,
+   "lifecycle_rules": [
+    {
+     "name": "archive-old",
+     "action": "move_archive",
+     "after_days": 30,
+     "prefix": "raw/"
+    },
+    {
+     "name": "purge-raw",
+     "action": "delete",
+     "after_days": 60,
+     "prefix": "raw/"
+    }
+   ],
+   "objects": [
+    {
+     "key": "raw/0.dat",
+     "size_bytes": 5368709120,
+     "tier": "standard",
+     "last_modified": "2026-08-01"
+    },
+    {
+     "key": "raw/1.dat",
+     "size_bytes": 5368709120,
+     "tier": "standard",
+     "last_modified": "2026-08-01"
+    },
+    {
+     "key": "raw/2.dat",
+     "size_bytes": 5368709120,
+     "tier": "standard",
+     "last_modified": "2026-08-01"
+    },
+    {
+     "key": "img/0.dat",
+     "size_bytes": 1073741824,
+     "tier": "standard",
+     "last_modified": "2026-09-20"
+    },
+    {
+     "key": "img/1.dat",
+     "size_bytes": 1073741824,
+     "tier": "standard",
+     "last_modified": "2026-09-20"
+    },
+    {
+     "key": "img/2.dat",
+     "size_bytes": 1073741824,
+     "tier": "standard",
+     "last_modified": "2026-09-20"
+    },
+    {
+     "key": "img/3.dat",
+     "size_bytes": 1073741824,
+     "tier": "standard",
+     "last_modified": "2026-09-20"
+    },
+    {
+     "key": "img/4.dat",
+     "size_bytes": 1073741824,
+     "tier": "standard",
+     "last_modified": "2026-09-20"
+    },
+    {
+     "key": "img/old-0.dat",
+     "size_bytes": 1073741824,
+     "tier": "standard",
+     "last_modified": "2026-04-01",
+     "previous_version": true
+    },
+    {
+     "key": "img/old-1.dat",
+     "size_bytes": 1073741824,
+     "tier": "standard",
+     "last_modified": "2026-04-01",
+     "previous_version": true
+    },
+    {
+     "key": "img/old-2.dat",
+     "size_bytes": 1073741824,
+     "tier": "standard",
+     "last_modified": "2026-04-01",
+     "previous_version": true
+    }
+   ]
+  },
+  {
+   "name": "backups",
+   "versioning": false,
+   "lifecycle_rules": [
+    {
+     "name": "ia-30",
+     "action": "move_infrequent_access",
+     "after_days": 60
+    },
+    {
+     "name": "arch-45",
+     "action": "move_archive",
+     "after_days": 45
+    },
+    {
+     "name": "abort-mp",
+     "action": "abort_multipart",
+     "after_days": 7
+    },
+    {
+     "name": "expire",
+     "action": "delete",
+     "after_days": 400
+    }
+   ],
+   "objects": [
+    {
+     "key": "db/0.dat",
+     "size_bytes": 107374182400,
+     "tier": "archive",
+     "last_modified": "2025-01-10"
+    },
+    {
+     "key": "db/1.dat",
+     "size_bytes": 107374182400,
+     "tier": "archive",
+     "last_modified": "2025-01-10"
+    },
+    {
+     "key": "db/2.dat",
+     "size_bytes": 107374182400,
+     "tier": "archive",
+     "last_modified": "2025-01-10"
+    },
+    {
+     "key": "db/3.dat",
+     "size_bytes": 107374182400,
+     "tier": "archive",
+     "last_modified": "2025-01-10"
+    }
+   ]
+  }
+ ]
+}

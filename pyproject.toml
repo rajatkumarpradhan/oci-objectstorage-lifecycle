@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "oci-objectstorage-lifecycle"
+version = "0.1.0"
+description = "Offline Object Storage lifecycle and tiering review on synthetic inventories"
+requires-python = ">=3.10"
+readme = "README.md"
+
+[project.scripts]
+os-lifecycle = "os_lifecycle.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
