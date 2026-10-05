@@ -130,3 +130,48 @@ def analyze(inv: Inventory):
     out.sort(key=lambda f: (SEV[f.severity], f.rule, f.bucket))
     totals = {k: round(v, 3) for k, v in totals.items()}
     return out, totals
+
+
+ROOT_PREFIX = "(root)"
+
+
+def top_prefix(key: str) -> str:
+    """First path segment of an object key, or '(root)' when the key has no '/'."""
+    return key.split("/", 1)[0] + "/" if "/" in key else ROOT_PREFIX
+
+
+def prefix_breakdown(inv: Inventory) -> dict:
+    """Stale-data candidates grouped by bucket and top-level prefix (same rules as OS002).
+
+    Totals across prefixes equal the OS002 totals; this only shows where the data sits.
+    """
+    p = inv.prices
+    result: dict = {}
+    for b in inv.buckets:
+        groups: dict = {}
+        for o in b.objects:
+            if o.previous_version:
+                continue
+            age = (inv.as_of - o.last_modified).days
+            ia = arch = 0.0
+            if o.tier == "standard" and age >= STALE_DAYS_IA and not _covered(b, o, ("move_infrequent_access", "move_archive"), "objects"):
+                if age >= STALE_DAYS_ARCHIVE:
+                    arch = o.size_bytes / GB
+                else:
+                    ia = o.size_bytes / GB
+            elif o.tier == "infrequent_access" and age >= STALE_DAYS_ARCHIVE and not _covered(b, o, ("move_archive",), "objects"):
+                arch = o.size_bytes / GB
+            if ia or arch:
+                g = groups.setdefault(top_prefix(o.key), {"candidate_ia_gb": 0.0, "candidate_archive_gb": 0.0, "objects": 0})
+                g["candidate_ia_gb"] += ia
+                g["candidate_archive_gb"] += arch
+                g["objects"] += 1
+        for g in groups.values():
+            g["estimated_monthly_saving"] = (g["candidate_ia_gb"] * max(0.0, p["standard"] - p["infrequent_access"])
+                                             + g["candidate_archive_gb"] * max(0.0, p["standard"] - p["archive"]))
+            for k in ("candidate_ia_gb", "candidate_archive_gb"):
+                g[k] = round(g[k], 3)
+            g["estimated_monthly_saving"] = round(g["estimated_monthly_saving"], 2)
+        if groups:
+            result[b.name] = dict(sorted(groups.items(), key=lambda kv: (-kv[1]["estimated_monthly_saving"], kv[0])))
+    return result

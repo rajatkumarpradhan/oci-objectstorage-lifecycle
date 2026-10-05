@@ -169,6 +169,55 @@ class FindingTests(unittest.TestCase):
         self.assertEqual(sev, sorted(sev))
 
 
+class PrefixTests(unittest.TestCase):
+    def test_top_prefix(self):
+        self.assertEqual(analysis.top_prefix("2026/01/a.dat"), "2026/")
+        self.assertEqual(analysis.top_prefix("a.dat"), "(root)")
+        self.assertEqual(analysis.top_prefix("/lead/x"), "/")
+
+    def test_totals_match_os002(self):
+        i = inv()
+        _, _, t = found(i)
+        bd = analysis.prefix_breakdown(i)
+        total = sum(g["estimated_monthly_saving"] for gs in bd.values() for g in gs.values())
+        self.assertAlmostEqual(total, t["estimated_monthly_saving"], places=1)
+        gb = sum(g["candidate_ia_gb"] + g["candidate_archive_gb"] for gs in bd.values() for g in gs.values())
+        self.assertAlmostEqual(gb, t["stale_ia_gb"] + t["stale_archive_gb"], places=2)
+
+    def test_example_groups(self):
+        bd = analysis.prefix_breakdown(inv())["app-logs"]
+        self.assertEqual(list(bd), ["2023/", "2026/"])  # sorted by saving, biggest first
+        self.assertEqual(bd["2023/"]["candidate_archive_gb"], 200.0)
+
+    def test_nested_prefixes_roll_up_to_first_segment(self):
+        def mut(d):
+            b = bucket(d, "app-logs")
+            b["objects"] = [dict(key=k, size_bytes=G, tier="standard", last_modified="2026-01-01")
+                            for k in ("logs/a/1", "logs/b/2", "top.dat")]
+            b["lifecycle_rules"] = []
+        bd = analysis.prefix_breakdown(inv(mut))["app-logs"]
+        self.assertEqual(bd["logs/"]["objects"], 2)
+        self.assertEqual(bd["(root)"]["objects"], 1)
+
+    def test_covered_prefix_excluded(self):
+        def mut(d):
+            b = bucket(d, "app-logs")
+            b["lifecycle_rules"] = [dict(name="t", action="move_archive", after_days=30, prefix="2023/")]
+        bd = analysis.prefix_breakdown(inv(mut))["app-logs"]
+        self.assertNotIn("2023/", bd)
+        self.assertIn("2026/", bd)
+
+    def test_clean_bucket_absent(self):
+        def mut(d):
+            d["buckets"] = [dict(name="ok", versioning=False, objects=[
+                dict(key="a", size_bytes=G, tier="standard", last_modified="2026-09-30")], lifecycle_rules=[])]
+        self.assertEqual(analysis.prefix_breakdown(inv(mut)), {})
+
+    def test_previous_versions_ignored(self):
+        bd = analysis.prefix_breakdown(inv())
+        self.assertNotIn("user-uploads", bd)
+
+
 class CliTests(unittest.TestCase):
     def test_report(self):
         with tempfile.TemporaryDirectory() as t:
@@ -178,6 +227,15 @@ class CliTests(unittest.TestCase):
                 rep = json.load(f)
         self.assertEqual(rep["as_of"], "2026-10-01")
         self.assertIn("ignore retrieval", rep["disclaimer"])
+
+    def test_report_has_breakdown_and_unchanged_totals(self):
+        with tempfile.TemporaryDirectory() as t:
+            out = os.path.join(t, "r.json")
+            main([EX, "--output", out, "--by-prefix"])
+            with open(out, encoding="utf-8") as f:
+                rep = json.load(f)
+        self.assertIn("2023/", rep["by_prefix"]["app-logs"])
+        self.assertAlmostEqual(rep["totals"]["estimated_monthly_saving"], 120 * 0.013 + 200 * 0.022, places=2)
 
     def test_fail_on_high(self):
         self.assertEqual(main([EX, "--fail-on-high"]), 2)

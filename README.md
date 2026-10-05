@@ -9,6 +9,7 @@ Offline review of Object Storage lifecycle rules and tiering from an exported bu
 ```
 python -m pip install -e .
 os-lifecycle examples/synthetic.json --output report.json
+os-lifecycle examples/synthetic.json --by-prefix          # stale data grouped by top-level prefix
 os-lifecycle examples/synthetic.json --fail-on-high      # exit code 2 on any high finding
 python -m unittest discover -s tests -v
 ```
@@ -30,6 +31,8 @@ The input has `as_of` (the date ages are measured from, so results are reproduci
 
 Rules match by plain string prefix; disabled rules are ignored. The 31 and 90 day minimums are the model's assumptions: check current Oracle documentation before relying on them.
 
+`--by-prefix` prints where the OS002 candidates sit, grouped by the first path segment of the key (`2023/`, or `(root)` for keys with no `/`), largest saving first. The JSON report always includes the same breakdown under `by_prefix`. Totals across prefixes equal the OS002 totals (a test checks this); findings and totals are otherwise unchanged. Only the first path segment is used, so nested folders roll up.
+
 ## Limits
 
 - Retrieval fees, request costs, minimum object sizes, replication and cross-region copies are not modelled, so savings are an upper bound and overstate gains for data that is still read.
@@ -40,7 +43,7 @@ Rules match by plain string prefix; disabled rules are ignored. The 31 and 90 da
 
 ## Tests
 
-26 unit tests cover validation, each rule and its boundary (for example exactly 90 days after an Archive move), prefix scoping, disabled rules, the saving arithmetic, never reporting a negative saving, and the CLI. CI runs on Python 3.10, 3.11 and 3.12.
+34 unit tests cover validation, each rule and its boundary (for example exactly 90 days after an Archive move), prefix scoping, disabled rules, the saving arithmetic, never reporting a negative saving, and the CLI. CI runs on Python 3.10, 3.11 and 3.12.
 
 ## License
 
