@@ -11,10 +11,17 @@ python -m pip install -e .
 os-lifecycle examples/synthetic.json --output report.json
 os-lifecycle examples/synthetic.json --by-prefix          # stale data grouped by top-level prefix
 os-lifecycle examples/synthetic.json --fail-on-high      # exit code 2 on any high finding
+os-import examples/synthetic_listing.csv --as-of 2026-10-01 --prices standard=0.025,infrequent_access=0.012,archive=0.003 --output inventory.json
 python -m unittest discover -s tests -v
 ```
 
 The input has `as_of` (the date ages are measured from, so results are reproducible), a `prices` table (per GB-month for `standard`, `infrequent_access`, `archive`), and buckets with `objects`, `multipart_uploads` and `lifecycle_rules`.
+
+## CSV importer
+
+`os-import` turns a flat object listing into the inventory JSON, so the analyzer can be tried without hand-writing JSON. Required columns: `key, size_bytes, tier, last_modified`. Optional: `bucket` (otherwise pass `--bucket NAME`) and `previous_version` (true/false). Tiers are `standard`, `infrequent_access`, `archive`. `--as-of` and `--prices` are required and come from you, not the CSV; the example prices are illustrative, not real OCI prices.
+
+Every row is validated with the same rules as the JSON loader. All malformed rows are reported with their CSV row number (row 1 is the header), nothing is written, and the exit code is 1. A listing has no lifecycle rules or multipart uploads, so every bucket comes out with none: the analyzer will report OS001 (no rules) and the OS002 stale-data estimate, but the rule-dependent checks have nothing to compare against. Versioning is set to on for a bucket only if a `previous_version` row is present. The bundled `examples/synthetic_listing.csv` is synthetic.
 
 ## Rules
 
@@ -43,7 +50,7 @@ Rules match by plain string prefix; disabled rules are ignored. The 31 and 90 da
 
 ## Tests
 
-34 unit tests cover validation, each rule and its boundary (for example exactly 90 days after an Archive move), prefix scoping, disabled rules, the saving arithmetic, never reporting a negative saving, and the CLI. CI runs on Python 3.10, 3.11 and 3.12.
+49 unit tests cover validation, each rule and its boundary (for example exactly 90 days after an Archive move), prefix scoping, disabled rules, the saving arithmetic, never reporting a negative saving, the CLI, and the CSV importer (malformed rows, duplicates, missing columns, price parsing). CI runs on Python 3.10, 3.11 and 3.12.
 
 ## License
 

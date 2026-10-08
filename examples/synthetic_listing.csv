@@ -1,0 +1,6 @@
+bucket,key,size_bytes,tier,last_modified,previous_version
+app-logs,2026/01/a.dat,21474836480,standard,2026-01-15,
+app-logs,2026/02/b.dat,10737418240,standard,2026-02-10,
+app-logs,2026/09/c.dat,5368709120,standard,2026-09-25,
+media,img/old.png,2147483648,infrequent_access,2025-11-01,
+media,img/old.png,1073741824,standard,2025-06-01,true

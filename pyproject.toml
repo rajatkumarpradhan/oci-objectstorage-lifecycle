@@ -11,6 +11,7 @@ readme = "README.md"
 
 [project.scripts]
 os-lifecycle = "os_lifecycle.cli:main"
+os-import = "os_lifecycle.importer:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
